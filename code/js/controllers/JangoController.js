@@ -1,17 +1,18 @@
-;(function() {
-  "use strict";
-
+"use strict";
+(function() {
   var BaseController = require("BaseController");
 
   new BaseController({
     siteName: "Jango",
-    playPause: "#btn-playpause",
-    playNext: "#btn-ff",
-    like: "#btn-fav",
-    dislike: "#player_ban",
+    playPause: "#player_pp",
+    playNext: "#player_skip",
+    like: "#player_thumbs_up",
+    confirmLike: "#thumbs_updown_form_submit > input",
+    dislike: "#player_thumbs_down",
+    confirmDislike: "#thumbs_updown_form_submit > input",
 
-    playState: "#btn-playpause.pause",
-    song: "#current-song",
-    artist: "#player_current_artist > a"
+    playState: "#player_pp.pause",
+    song: "#player_info > div",
+    artist: "#player_info > div + a"
   });
 })();

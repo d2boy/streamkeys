@@ -1,6 +1,5 @@
-;(function() {
-  "use strict";
-
+"use strict";
+(function() {
   var sk_log = require("../modules/SKLog.js");
 
   function BaseController(options) {
@@ -15,7 +14,9 @@
       playPrev: (options.playPrev || null),
       mute: (options.mute || null),
       like: (options.like || null),
+      confirmLike: (options.confirmLike || null),
       dislike: (options.dislike || null),
+      confirmDislike: (options.confirmDislike || null),
       iframe: (options.iframe || null),
 
       //** States **//
@@ -67,8 +68,15 @@
   }
 
   BaseController.prototype.doc = function() {
-    var useFrameSelector = (this.selectors.iframe && document.querySelector(this.selectors.iframe).tagName.indexOf("FRAME") > -1);
-    return (useFrameSelector) ? document.querySelector(this.selectors.iframe).contentWindow.document : document;
+    var returnDoc = document;
+    if (this.selectors.iframe) {
+      if (document.querySelector(this.selectors.iframe)) {
+        if (document.querySelector(this.selectors.iframe).tagName.indexOf("FRAME") > -1) {
+          returnDoc = document.querySelector(this.selectors.iframe).contentWindow.document;
+        }
+      }
+    }
+    return returnDoc;
   };
 
   /**
@@ -138,10 +146,26 @@
 
   BaseController.prototype.like = function() {
     this.click({action: "like", selectorButton: this.selectors.like, selectorFrame: this.selectors.iframe});
+    if(this.selectors.confirmLike !== null) {
+      var controller = this;
+      var observer = new MutationObserver(function() {
+        this.disconnect();
+        controller.click({action: "confirmLike", selectorButton: controller.selectors.confirmLike, selectorFrame: controller.selectors.iframe});
+      });
+      observer.observe(document.documentElement, {childList: true, subtree: true});
+    }
   };
 
   BaseController.prototype.dislike = function() {
     this.click({action: "dislike", selectorButton: this.selectors.dislike, selectorFrame: this.selectors.iframe});
+    if(this.selectors.confirmDislike !== null) {
+      var controller = this;
+      var observer = new MutationObserver(function() {
+        this.disconnect();
+        controller.click({action: "confirmDislike", selectorButton: controller.selectors.confirmDislike, selectorFrame: controller.selectors.iframe});
+      });
+      observer.observe(document.documentElement, {childList: true, subtree: true});
+    }
   };
 
   /**
@@ -150,7 +174,7 @@
    */
   BaseController.prototype.isPlaying = function() {
     var playEl = this.doc().querySelector(this.selectors.play),
-        isPlaying = false;
+      isPlaying = false;
 
     if(this.buttonSwitch) {
       // If playEl does not exist then it is currently playing
@@ -197,14 +221,14 @@
    */
   BaseController.prototype.getStateData = function() {
     return {
-      song: this.getSongData(this.selectors.song),
-      artist: this.getSongData(this.selectors.artist),
-      album: this.getSongData(this.selectors.album),
+      song: (this.getSongData(this.selectors.song) === null ? null : this.getSongData(this.selectors.song).replace(/\s+/g, " ")),
+      artist: (this.getSongData(this.selectors.artist) === null ? null : this.getSongData(this.selectors.artist).replace(/\s+/g, " ")),
+      album: (this.getSongData(this.selectors.album) === null ? null : this.getSongData(this.selectors.album).replace(/\s+/g, " ")),
       art: this.getArtData(this.selectors.art),
       currentTime: this.getSongData(this.selectors.currentTime),
       totalTime: this.getSongData(this.selectors.totalTime),
       isPlaying: this.isPlaying(),
-      siteName: this.siteName,
+      siteName: (this.siteName == null ? null : this.siteName.replace(/\s+/g, " ")),
       canDislike: !!(this.selectors.dislike && this.doc().querySelector(this.selectors.dislike)),
       canPlayPrev: this.overridePlayPrev || !!(this.selectors.playPrev && this.doc().querySelector(this.selectors.playPrev)),
       canPlayPause: this.overridePlayPause || !!(
@@ -224,7 +248,7 @@
    * @return {Boolean} true if song just changed, false otherwise
    */
   BaseController.prototype.getSongChanged = function(newState) {
-      return this.oldState &&
+    return this.oldState &&
             newState &&
             this.oldState.song !== newState.song;
   };

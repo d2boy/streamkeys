@@ -2,7 +2,9 @@
  * Simulates _basic_ chrome.sync.storageArea get/set functionality
  */
 
-var _ = require("lodash");
+"use strict";
+var _ = require("lodash"), sinon = require("sinon");
+
 var storageObject = {};
 
 module.exports = {
@@ -11,7 +13,7 @@ module.exports = {
   }),
 
   set: sinon.spy(function(obj, callback) {
-    _.extend(storageObject, obj);
+    _.assignIn(storageObject, obj);
 
     if(_.isFunction(callback)) callback(true);
   }),

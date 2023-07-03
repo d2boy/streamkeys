@@ -1,8 +1,7 @@
-;(function() {
-  "use strict";
-
+"use strict";
+(function() {
   var BaseController = require("BaseController"),
-      _ = require("lodash");
+    _ = require("lodash");
 
   var multiSelectors = {
     play: [".player-play-pause.play", ".button-nfplayerPlay"],
@@ -22,11 +21,11 @@
     var that = this;
 
     if(this.doc().querySelector(multiSelectors.play[0]) || this.doc().querySelector(multiSelectors.pause[0])) {
-      _.each(multiSelectors, function(value, key) {
+      _.forEach(multiSelectors, function(value, key) {
         that.selectors[key] = value[0];
       });
     } else {
-      _.each(multiSelectors, function(value, key) {
+      _.forEach(multiSelectors, function(value, key) {
         that.selectors[key] = value[1];
       });
     }
